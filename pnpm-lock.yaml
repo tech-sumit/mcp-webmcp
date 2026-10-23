@@ -16,7 +16,7 @@ importers:
         version: 0.4.0
       '@tech-sumit/webmcp-cdp':
         specifier: github:tech-sumit/webmcp-cdp
-        version: https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/9b7768a3cf41416594a6cbb4dc82b4bb4156c6f8
+        version: https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/685b3259b96ee4f403341065f930983114ac80c2
       commander:
         specifier: ^13.0.0
         version: 13.1.0
@@ -440,12 +440,8 @@ packages:
   '@tech-sumit/ai-inspector-types@0.4.0':
     resolution: {integrity: sha512-QO7SQeD2A2GJ+SZNgk7h32abiTadHLYY3IRhX7ZE0xSGF7orgbnrPl1xdxE6J6l4BEYbe68oo5qo1lLZJKWOVQ==}
 
-  '@tech-sumit/ai-inspector-types@https://codeload.github.com/tech-sumit/ai-inspector-types/tar.gz/481da7a62f266030c5b4313874a9453f250c4bcc':
-    resolution: {tarball: https://codeload.github.com/tech-sumit/ai-inspector-types/tar.gz/481da7a62f266030c5b4313874a9453f250c4bcc}
-    version: 0.4.0
-
-  '@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/9b7768a3cf41416594a6cbb4dc82b4bb4156c6f8':
-    resolution: {tarball: https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/9b7768a3cf41416594a6cbb4dc82b4bb4156c6f8}
+  '@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/685b3259b96ee4f403341065f930983114ac80c2':
+    resolution: {tarball: https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/685b3259b96ee4f403341065f930983114ac80c2}
     version: 0.2.0
 
   '@types/body-parser@1.19.6':
@@ -1841,11 +1837,9 @@ snapshots:
 
   '@tech-sumit/ai-inspector-types@0.4.0': {}
 
-  '@tech-sumit/ai-inspector-types@https://codeload.github.com/tech-sumit/ai-inspector-types/tar.gz/481da7a62f266030c5b4313874a9453f250c4bcc': {}
-
-  '@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/9b7768a3cf41416594a6cbb4dc82b4bb4156c6f8':
+  '@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/685b3259b96ee4f403341065f930983114ac80c2':
     dependencies:
-      '@tech-sumit/ai-inspector-types': https://codeload.github.com/tech-sumit/ai-inspector-types/tar.gz/481da7a62f266030c5b4313874a9453f250c4bcc
+      '@tech-sumit/ai-inspector-types': 0.4.0
       chrome-remote-interface: 0.34.0
     transitivePeerDependencies:
       - bufferutil

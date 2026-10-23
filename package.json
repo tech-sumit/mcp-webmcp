@@ -66,9 +66,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@tech-sumit/ai-inspector-types",
-      "@tech-sumit/ai-inspector-types@https://codeload.github.com/tech-sumit/ai-inspector-types/tar.gz/481da7a62f266030c5b4313874a9453f250c4bcc",
       "@tech-sumit/webmcp-cdp",
-      "@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/9b7768a3cf41416594a6cbb4dc82b4bb4156c6f8",
+      "@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/685b3259b96ee4f403341065f930983114ac80c2",
       "esbuild"
     ]
   },
