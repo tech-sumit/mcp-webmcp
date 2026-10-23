@@ -30,8 +30,14 @@ export function createMcpServer(registry: ToolRegistry): Server {
         description: t.description,
         inputSchema: parseInputSchema(t.inputSchema),
         ...(annotations && { annotations }),
-        // Preserve the original WebMCP hints (e.g. `debugging`) for clients that understand them
-        ...(webmcpAnnotations && { _meta: { "webmcp/annotations": webmcpAnnotations } }),
+        // Preserve the original WebMCP hints (e.g. `debugging`) and the registering
+        // document's origin, which the spec expects agents to be shown
+        ...((webmcpAnnotations || t.origin) && {
+          _meta: {
+            ...(webmcpAnnotations && { "webmcp/annotations": webmcpAnnotations }),
+            ...(t.origin && { "webmcp/origin": t.origin }),
+          },
+        }),
       };
     }),
   }));

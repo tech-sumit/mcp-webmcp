@@ -37,12 +37,19 @@ export function parseInputSchema(inputSchema: string | undefined): Record<string
 /**
  * Normalized WebMCP annotations for a tool, merging the legacy top-level
  * `readOnlyHint` with `annotations`. Returns undefined if neither is set.
+ *
+ * Per spec every hint defaults to `false` once annotations are present.
+ * Chrome omits false hints from `getTools()`, so the defaults are filled in.
  */
 export function toolAnnotations(tool: WebMCPTool): WebMCPToolAnnotations | undefined {
   if (!tool.annotations && tool.readOnlyHint == null) return undefined;
+  const a = tool.annotations;
   return {
-    ...tool.annotations,
-    readOnlyHint: tool.annotations?.readOnlyHint ?? tool.readOnlyHint ?? false,
+    ...a,
+    readOnlyHint: a?.readOnlyHint ?? tool.readOnlyHint ?? false,
+    untrustedContentHint: a?.untrustedContentHint ?? false,
+    consequentialHint: a?.consequentialHint ?? false,
+    debugging: a?.debugging ?? false,
   };
 }
 
@@ -53,6 +60,11 @@ export function toolAnnotations(tool: WebMCPTool): WebMCPToolAnnotations | undef
  * - `readOnlyHint` → `readOnlyHint`
  * - `consequentialHint` (significant, real-world or non-reversible) → `destructiveHint`
  * - `untrustedContentHint` (output contains untrusted data) → `openWorldHint`
+ *
+ * WebMCP hints default to `false` while MCP's `destructiveHint` and
+ * `openWorldHint` default to `true`, so when a tool has annotations both
+ * are always set explicitly. A tool with no annotations gets no hints, and
+ * MCP clients keep their conservative defaults.
  */
 export function toMcpAnnotations(tool: WebMCPTool): Record<string, unknown> | undefined {
   const a = toolAnnotations(tool);
@@ -60,8 +72,8 @@ export function toMcpAnnotations(tool: WebMCPTool): Record<string, unknown> | un
   if (tool.title) out.title = tool.title;
   if (a) {
     out.readOnlyHint = a.readOnlyHint;
-    if (a.consequentialHint != null) out.destructiveHint = a.consequentialHint;
-    if (a.untrustedContentHint != null) out.openWorldHint = a.untrustedContentHint;
+    out.destructiveHint = a.consequentialHint;
+    out.openWorldHint = a.untrustedContentHint;
   }
   return Object.keys(out).length > 0 ? out : undefined;
 }

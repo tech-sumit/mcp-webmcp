@@ -30,7 +30,7 @@ MCP server bridging browser WebMCP tools to desktop MCP clients.
 - MCP uses parsed objects for inputSchema and arguments
 - Server must JSON.parse inputSchema when sending to MCP clients
 - Server must JSON.stringify arguments when calling WebMCP tools
-- WebMCP annotations map to MCP annotations: `title`→`title`, `readOnlyHint`→`readOnlyHint`, `consequentialHint`→`destructiveHint`, `untrustedContentHint`→`openWorldHint`; the raw hints go in `_meta["webmcp/annotations"]` (see src/webmcp-tool.ts)
+- WebMCP annotations map to MCP annotations: `title`→`title`, `readOnlyHint`→`readOnlyHint`, `consequentialHint`→`destructiveHint`, `untrustedContentHint`→`openWorldHint`; the raw hints go in `_meta["webmcp/annotations"]` and the tool's origin in `_meta["webmcp/origin"]` (see src/webmcp-tool.ts). WebMCP hints default to false but MCP's `destructiveHint`/`openWorldHint` default to true, so both are always set when a tool has annotations
 - Page-level WebMCP access uses `document.modelContext.getTools()` / `executeTool(tool, inputObject)`; `navigator.modelContextTesting` is only a fallback for Chrome <= 151
 
 ## Sources
