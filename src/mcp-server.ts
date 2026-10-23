@@ -4,6 +4,7 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolRegistry } from "./tool-registry.js";
+import { parseInputSchema, toMcpAnnotations, toolAnnotations, type WebMCPTool } from "./webmcp-tool.js";
 
 /**
  * Create an MCP server backed by the ToolRegistry.
@@ -20,20 +21,17 @@ export function createMcpServer(registry: ToolRegistry): Server {
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: registry.listTools().map((t) => {
-      let inputSchema: Record<string, unknown> = { type: "object" };
-      try {
-        inputSchema = JSON.parse(t.inputSchema) as Record<string, unknown>;
-      } catch {
-        // Malformed schema — fall back to empty object schema
-      }
+    tools: registry.listTools().map((t: WebMCPTool) => {
+      const annotations = toMcpAnnotations(t);
+      const webmcpAnnotations = toolAnnotations(t);
       return {
         name: t.name,
+        ...(t.title && { title: t.title }),
         description: t.description,
-        inputSchema,
-        ...(t.readOnlyHint != null && {
-          annotations: { readOnlyHint: t.readOnlyHint },
-        }),
+        inputSchema: parseInputSchema(t.inputSchema),
+        ...(annotations && { annotations }),
+        // Preserve the original WebMCP hints (e.g. `debugging`) for clients that understand them
+        ...(webmcpAnnotations && { _meta: { "webmcp/annotations": webmcpAnnotations } }),
       };
     }),
   }));

@@ -1,6 +1,6 @@
 {
   "name": "@tech-sumit/mcp-webmcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server bridging browser WebMCP tools to desktop MCP clients",
   "type": "module",
   "main": "./dist/index.js",

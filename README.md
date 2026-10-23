@@ -86,7 +86,7 @@ graph TD
 
 | Mode | How it works | When to use |
 |---|---|---|
-| **`--launch` flag** | Launches Chrome on startup via `chromium.launch()`. Injects `--enable-features=WebMCPTesting` automatically. | Zero-config setup. Browser ready immediately. |
+| **`--launch` flag** | Launches Chrome on startup via `chromium.launch()`. Injects `--enable-features=WebMCPTesting,DevToolsWebMCPSupport` automatically. | Zero-config setup. Browser ready immediately. |
 | **`browser_launch` tool** _(default)_ | No browser on startup. AI agent calls `browser_launch` tool when needed. | Agent controls when to open the browser. |
 
 ### Transport Modes
@@ -101,7 +101,7 @@ graph TD
 | Requirement | Details |
 |---|---|
 | **Node.js** | v18+ |
-| **Chrome** | Version **146+** (Beta or Canary). Stable Chrome will not work until WebMCP ships. |
+| **Chrome** | Version **149+** (WebMCP origin trial) with `chrome://flags/#enable-webmcp-testing` enabled, or launched with `--enable-features=WebMCPTesting,DevToolsWebMCPSupport`. Chrome 146–151 still work through the legacy `navigator.modelContextTesting` API. |
 
 ### Checking your Chrome version
 
@@ -119,7 +119,7 @@ google-chrome-beta --version
 "C:\Program Files\Google\Chrome Beta\Application\chrome.exe" --version
 ```
 
-The server validates Chrome >= 146 on startup and will throw a clear error if the version is too old.
+The server validates Chrome >= 146 on startup (149+ recommended) and will throw a clear error if the version is too old.
 
 ## Setup
 
@@ -363,19 +363,19 @@ sequenceDiagram
     MCP-->>Agent: "Le Petit Bistro"
 
     Agent->>MCP: webmcp_list_tools
-    MCP->>Page: navigator.modelContextTesting.listTools()
+    MCP->>Page: document.modelContext.getTools()
     Page-->>MCP: [{name: "book_table_le_petit_bistro", ...}]
     MCP-->>Agent: Tool schema with inputs
 
     Agent->>MCP: webmcp_call_tool {name: "book_table_le_petit_bistro", ...}
-    MCP->>Page: navigator.modelContextTesting.executeTool(...)
+    MCP->>Page: document.modelContext.executeTool(tool, input)
     Page-->>MCP: "Reservation confirmed"
     MCP-->>Agent: "Hello Sumit, We look forward to welcoming you..."
 ```
 
 ### What happens
 
-1. **`browser_launch`** opens Chrome Beta with `--enable-features=WebMCPTesting`
+1. **`browser_launch`** opens Chrome Beta with `--enable-features=WebMCPTesting,DevToolsWebMCPSupport`
 2. **`browser_navigate`** loads the Le Petit Bistro reservation form
 3. **`webmcp_list_tools`** discovers `book_table_le_petit_bistro` and its full input schema (name, phone, date, time, guests, seating, requests)
 4. **`webmcp_call_tool`** books the table — the form auto-fills and a confirmation modal appears: *"Reservation Received — Bon Appetit!"*
@@ -399,7 +399,7 @@ flowchart TD
     Q3 -- Yes --> Q4{"MCP client connects?"}
     Q4 -- No --> F4["Check mcp.json config<br/>Toggle MCP off/on"]
     Q4 -- Yes --> Q5{"WebMCP tools work?"}
-    Q5 -- No --> F5["Ensure --enable-features=WebMCPTesting<br/>(--launch adds it automatically)"]
+    Q5 -- No --> F5["Enable chrome://flags/#enable-webmcp-testing<br/>or --enable-features=WebMCPTesting,DevToolsWebMCPSupport<br/>(--launch adds it automatically)"]
     Q5 -- Yes --> OK(["Everything working"])
 ```
 
@@ -413,7 +413,7 @@ Your Chrome is older than 146. Install Chrome Beta or Canary:
 
 #### "WebMCP is NOT available"
 
-Chrome was not launched with `--enable-features=WebMCPTesting`. If using CDP mode, close all Chrome windows and relaunch with the flag. Launch mode (`--launch`) adds this flag automatically.
+`document.modelContext` is undefined on the page. Enable `chrome://flags/#enable-webmcp-testing` (Chrome 149+), or close all Chrome windows and relaunch with `--enable-features=WebMCPTesting,DevToolsWebMCPSupport`. Launch mode (`--launch`) adds these flags automatically. Pages enrolled in the WebMCP origin trial work without flags.
 
 #### "No browser contexts found"
 

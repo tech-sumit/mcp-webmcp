@@ -20,7 +20,7 @@ export class ToolRegistry {
   /**
    * Replace all tools from a source with a new set.
    * Removes stale entries that were previously associated with this source
-   * but are no longer in the new list (e.g., after provideContext replaces tools).
+   * but are no longer in the new list (e.g., after a page navigates or aborts a registration signal).
    */
   addTools(source: ToolSource, tools: DiscoveredTool[]): void {
     // Remove all previous entries from this source
