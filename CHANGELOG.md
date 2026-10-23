@@ -11,6 +11,8 @@ Aligns with the October 2026 WebMCP draft and Chromium, which removed `navigator
 - **Richer `webmcp_list_tools` output**: includes each tool's `title`, `annotations` and (for cross-origin iframe tools) `origin`; the description tells agents to treat `untrustedContentHint` output as untrusted and to confirm `consequentialHint` tools with the user
 - **Launch flags**: `--launch` / `browser_launch` now pass `--enable-features=WebMCPTesting,DevToolsWebMCPSupport` so the CDP `WebMCP` domain is available too
 
+- **Chrome 153 compatibility**: accepts `inputSchema` as an object (spec) or JSON string (current Chrome) and retries `executeTool()` with a JSON string input when Chrome rejects the spec's object form. Verified end to end against Chrome 153.0.8010.12
+
 ### Bug fixes
 
 - Tools without an `inputSchema` (allowed by the spec) no longer crash `webmcp_list_tools` with a JSON parse error

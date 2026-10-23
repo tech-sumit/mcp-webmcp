@@ -1351,7 +1351,10 @@ export class PlaywrightBrowserSource implements ToolSource {
             name: t.name,
             ...(t.title ? { title: t.title } : {}),
             description: t.description,
-            inputSchema: t.inputSchema ?? { type: "object", properties: {} },
+            // Spec: object. Chrome 153 still returns the JSON string.
+            inputSchema: typeof t.inputSchema === "string"
+              ? JSON.parse(t.inputSchema)
+              : t.inputSchema ?? { type: "object", properties: {} },
             ...(t.annotations ? { annotations: t.annotations } : {}),
             ...(t.origin && t.origin !== location.origin ? { origin: t.origin } : {}),
           })),
@@ -1419,7 +1422,17 @@ export class PlaywrightBrowserSource implements ToolSource {
           if (!tool) {
             throw new Error(`NotFoundError: WebMCP tool "${name}" is not registered on this page`);
           }
-          return mc.executeTool(tool, input);
+          try {
+            // Spec: executeTool(tool, inputObject)
+            return await mc.executeTool(tool, input);
+          } catch (e) {
+            // Chrome <= 153 still expects the input as a JSON string
+            const err = e as { name?: string; message?: string } | null;
+            if (err && (err.name === "TypeError" || /parse input/i.test(err.message ?? ""))) {
+              return mc.executeTool(tool, JSON.stringify(input));
+            }
+            throw e;
+          }
         }
         const mct = (navigator as { modelContextTesting?: { executeTool(name: string, args: string): Promise<string | null> } }).modelContextTesting;
         return mct!.executeTool(name, JSON.stringify(input));
