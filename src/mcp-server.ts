@@ -52,6 +52,10 @@ export function createMcpServer(registry: ToolRegistry): Server {
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
+    // Read the output contract before awaiting: the source may replace or
+    // remove the tool while the call is in flight.
+    const tool = registry.getTool(req.params.name) as WebMCPTool | undefined;
+    const hasOutputSchema = parseOutputSchema(tool?.outputSchema) !== undefined;
     const content = await registry.callTool(
       req.params.name,
       // MCP sends parsed object; WebMCP expects DOMString
@@ -59,10 +63,7 @@ export function createMcpServer(registry: ToolRegistry): Server {
     );
 
     // MCP: a tool that declares an outputSchema must return structuredContent
-    const tool = registry.getTool(req.params.name) as WebMCPTool | undefined;
-    const structuredContent = parseOutputSchema(tool?.outputSchema)
-      ? structuredContentOf(content)
-      : undefined;
+    const structuredContent = hasOutputSchema ? structuredContentOf(content) : undefined;
     return { content, ...(structuredContent && { structuredContent }) };
   });
 
