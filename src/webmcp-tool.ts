@@ -12,12 +12,14 @@ export interface WebMCPToolAnnotations {
 
 /**
  * A discovered tool with the optional fields newer sources (webmcp-cdp 0.3+,
- * the extension) attach, matching the spec's `RegisteredTool` dictionary.
+ * the extension) attach, matching the spec's `Tool` interface.
  */
 export interface WebMCPTool extends DiscoveredTool {
   title?: string;
   annotations?: WebMCPToolAnnotations;
   origin?: string;
+  /** JSON-stringified output JSON Schema (spec `Tool.outputSchema`, webmcp-cdp 0.4+). */
+  outputSchema?: string;
 }
 
 /** Parse a JSON-stringified input schema; absent or malformed → empty object schema. */
@@ -32,6 +34,48 @@ export function parseInputSchema(inputSchema: string | undefined): Record<string
     // Malformed schema — fall back to empty object schema
   }
   return { type: "object", properties: {} };
+}
+
+/**
+ * Parse a JSON-stringified output schema for MCP's `Tool.outputSchema`.
+ * MCP requires an object schema (`type: "object"` at the root), so anything
+ * else (absent, malformed, or e.g. a string schema) returns undefined.
+ */
+export function parseOutputSchema(outputSchema: string | undefined): Record<string, unknown> | undefined {
+  if (!outputSchema) return undefined;
+  try {
+    const parsed = JSON.parse(outputSchema) as unknown;
+    if (
+      parsed && typeof parsed === "object" && !Array.isArray(parsed) &&
+      (parsed as Record<string, unknown>).type === "object"
+    ) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    // Malformed schema
+  }
+  return undefined;
+}
+
+/**
+ * MCP `structuredContent` for a tool result: the parsed JSON object from the
+ * first text block. WebMCP tools return a JSON-stringified result, so a tool
+ * with an object `outputSchema` normally yields a JSON object here.
+ */
+export function structuredContentOf(
+  content: Array<{ type: string; text?: string }>,
+): Record<string, unknown> | undefined {
+  const text = content.find((c) => c.type === "text")?.text;
+  if (text == null) return undefined;
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    // Not JSON
+  }
+  return undefined;
 }
 
 /**

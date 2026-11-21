@@ -95,6 +95,7 @@ export class WebMCPMetaSource implements ToolSource {
         ...(t.title ? { title: t.title } : {}),
         description: t.description,
         inputSchema: parseInputSchema(t.inputSchema),
+        ...(t.outputSchema && { outputSchema: JSON.parse(t.outputSchema) as unknown }),
         ...(toolAnnotations(t) && { annotations: toolAnnotations(t) }),
         ...(t.origin ? { origin: t.origin } : {}),
       }));

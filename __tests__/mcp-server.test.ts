@@ -90,4 +90,40 @@ describe("createMcpServer", () => {
     });
     await client.close();
   });
+
+  it("maps outputSchema and returns structuredContent for object results", async () => {
+    const outputSchema = { type: "object", properties: { result: { type: "string" } } };
+    registry.addTools(mockSource(), [
+      { ...tool, outputSchema: JSON.stringify(outputSchema) } as DiscoveredTool,
+    ]);
+    const server = createMcpServer(registry);
+    const client = new Client({ name: "test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const { tools } = await client.listTools();
+    expect(tools[0].outputSchema).toEqual(outputSchema);
+
+    // The SDK client validates structuredContent against outputSchema
+    const res = await client.callTool({ name: "makeReservation", arguments: { name: "A" } });
+    expect(res.structuredContent).toEqual({ result: "ok" });
+    expect(res.content).toEqual([{ type: "text", text: '{"result":"ok"}' }]);
+    await client.close();
+  });
+
+  it("omits non-object output schemas and structuredContent", async () => {
+    registry.addTools(mockSource(), [
+      { ...tool, outputSchema: '{"type":"string"}' } as DiscoveredTool,
+    ]);
+    const server = createMcpServer(registry);
+    const client = new Client({ name: "test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const { tools } = await client.listTools();
+    expect(tools[0].outputSchema).toBeUndefined();
+    const res = await client.callTool({ name: "makeReservation", arguments: {} });
+    expect(res.structuredContent).toBeUndefined();
+    await client.close();
+  });
 });
