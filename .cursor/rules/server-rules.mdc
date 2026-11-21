@@ -8,6 +8,8 @@ globs: ["**/*.ts"]
 - ToolRegistry is the central aggregation point. All tool sources register through it.
 - MCP server must JSON.parse DOMString inputSchema before sending to MCP clients.
 - MCP server must JSON.stringify MCP arguments before calling WebMCP tools.
+- Map WebMCP tool metadata to MCP annotations via src/webmcp-tool.ts (title, readOnlyHint, consequentialHint→destructiveHint, untrustedContentHint→openWorldHint).
+- In-page WebMCP access uses `document.modelContext` (getTools/executeTool); `navigator.modelContextTesting` is a legacy fallback only.
 - ExtensionToolSource uses WebSocket server to accept connections from the extension.
 - CdpToolSource is imported from @tech-sumit/webmcp-cdp.
 - HTTP transport uses StreamableHTTPServerTransport on /mcp endpoint.

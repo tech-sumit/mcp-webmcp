@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { CdpToolSource } from "@tech-sumit/webmcp-cdp";
+import { parseInputSchema, toolAnnotations, type WebMCPTool } from "./webmcp-tool.js";
 import { ToolRegistry } from "./tool-registry.js";
 import { ExtensionToolSource } from "./sources/extension.js";
 import { PlaywrightBrowserSource } from "./sources/browser.js";
@@ -182,13 +183,16 @@ program
         console.log("No WebMCP tools found.");
       } else {
         console.log(`Found ${tools.length} tool(s):\n`);
-        for (const tool of tools) {
-          console.log(`  ${tool.name}: ${tool.description}`);
-          try {
-            const schema = JSON.parse(tool.inputSchema);
-            console.log(`    Input: ${JSON.stringify(schema)}`);
-          } catch {
-            console.log(`    Input: ${tool.inputSchema}`);
+        for (const tool of tools as WebMCPTool[]) {
+          const title = tool.title ? ` (${tool.title})` : "";
+          console.log(`  ${tool.name}${title}: ${tool.description}`);
+          console.log(`    Input: ${JSON.stringify(parseInputSchema(tool.inputSchema))}`);
+          const annotations = toolAnnotations(tool);
+          if (annotations) {
+            const hints = Object.entries(annotations)
+              .filter(([, v]) => v)
+              .map(([k]) => k);
+            if (hints.length > 0) console.log(`    Hints: ${hints.join(", ")}`);
           }
           console.log();
         }

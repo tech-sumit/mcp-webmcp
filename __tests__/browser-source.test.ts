@@ -398,4 +398,45 @@ describe("PlaywrightBrowserSource", () => {
       source.callTool("browser_nonexistent", "{}"),
     ).rejects.toThrow('Unknown browser tool: "browser_nonexistent"');
   });
+
+  // --- WebMCP page tools ---
+
+  it("should list WebMCP tools via document.modelContext.getTools()", async () => {
+    const { page } = await getMocks();
+    (page.evaluate as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      available: true,
+      tools: [{ name: "book_table", title: "Book", description: "Book a table", inputSchema: {} }],
+    });
+    const result = await source.callTool("webmcp_list_tools", "{}");
+    expect(JSON.parse((result[0] as { text: string }).text)[0]).toMatchObject({
+      name: "book_table",
+      title: "Book",
+    });
+  });
+
+  it("should report WebMCP as unavailable with spec-era guidance", async () => {
+    const { page } = await getMocks();
+    (page.evaluate as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ available: false });
+    const result = await source.callTool("webmcp_list_tools", "{}");
+    const text = (result[0] as { text: string }).text;
+    expect(text).toContain("document.modelContext is undefined");
+    expect(text).toContain("chrome://flags/#enable-webmcp-testing");
+  });
+
+  it("should execute WebMCP tools via document.modelContext.executeTool()", async () => {
+    const { page } = await getMocks();
+    (page.evaluate as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce("document")
+      .mockResolvedValueOnce('{"booked":true}');
+    const result = await source.callTool(
+      "webmcp_call_tool",
+      JSON.stringify({ name: "book_table", arguments: { guests: 2 } }),
+    );
+    expect(result).toEqual([{ type: "text", text: '{"booked":true}' }]);
+    expect((page.evaluate as ReturnType<typeof vi.fn>).mock.calls.at(-1)?.[1]).toEqual({
+      name: "book_table",
+      input: { guests: 2 },
+      api: "document",
+    });
+  });
 });

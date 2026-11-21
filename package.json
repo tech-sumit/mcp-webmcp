@@ -1,6 +1,6 @@
 {
   "name": "@tech-sumit/mcp-webmcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server bridging browser WebMCP tools to desktop MCP clients",
   "type": "module",
   "main": "./dist/index.js",
@@ -67,6 +67,7 @@
     "onlyBuiltDependencies": [
       "@tech-sumit/ai-inspector-types",
       "@tech-sumit/webmcp-cdp",
+      "@tech-sumit/webmcp-cdp@https://codeload.github.com/tech-sumit/webmcp-cdp/tar.gz/685b3259b96ee4f403341065f930983114ac80c2",
       "esbuild"
     ]
   },
