@@ -11,6 +11,7 @@ Aligns with the November 2026 WebMCP draft and Chromium, which removed `navigato
 - **Tool origin**: the registering document's origin is passed in `_meta["webmcp/origin"]` and in `webmcp_list_tools` output, since the spec expects agents to be shown each tool's origin
 - **Richer `webmcp_list_tools` output**: includes each tool's `title`, `annotations` and (for cross-origin iframe tools) `origin`; the description tells agents to treat `untrustedContentHint` output as untrusted and to confirm `consequentialHint` tools with the user
 - **Output schemas**: a WebMCP tool's `outputSchema` (spec `Tool.outputSchema`, Nov 2026) is exposed as MCP `outputSchema` when it is an object schema, and calls to such tools return the parsed JSON result as `structuredContent` (MCP requires it once a schema is declared). `webmcp_list_tools` also lists `outputSchema`
+- **webmcp-cdp from npm**: depends on `@tech-sumit/webmcp-cdp@^0.4.0` from npm instead of GitHub `main` (CDP `toolId` targeting and `outputSchema` in CDP mode)
 - **Launch flags**: `--launch` / `browser_launch` now pass `--enable-features=WebMCPTesting,DevToolsWebMCPSupport` so the CDP `WebMCP` domain is available too
 
 - **Chrome 153 compatibility**: accepts `inputSchema` as an object (spec) or JSON string (current Chrome) and retries `executeTool()` with a JSON string input when Chrome rejects the spec's object form. Verified end to end against Chrome 153.0.8010.12
