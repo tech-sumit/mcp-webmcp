@@ -1,15 +1,16 @@
 # Changelog
 
-## 0.3.0 (2026-10-23)
+## 0.3.0 (2026-11-21)
 
-Aligns with the October 2026 WebMCP draft and Chromium, which removed `navigator.modelContextTesting` in Chrome 152.
+Aligns with the November 2026 WebMCP draft and Chromium, which removed `navigator.modelContextTesting` in Chrome 152.
 
 ### Features
 
-- **`document.modelContext` support**: `webmcp_list_tools` uses `document.modelContext.getTools()` and `webmcp_call_tool` uses `document.modelContext.executeTool(registeredTool, inputObject)`. The startup probe detects `document.modelContext` first and falls back to the legacy `navigator.modelContextTesting` on Chrome 146–151
+- **`document.modelContext` support**: `webmcp_list_tools` uses `document.modelContext.getTools()` and `webmcp_call_tool` uses `document.modelContext.executeTool(tool, inputObject)`. The startup probe detects `document.modelContext` first and falls back to the legacy `navigator.modelContextTesting` on Chrome 146–151
 - **Full annotation mapping**: `tools/list` now maps WebMCP `title` → MCP `title`, `readOnlyHint` → `readOnlyHint`, `consequentialHint` → `destructiveHint` and `untrustedContentHint` → `openWorldHint`. Because WebMCP hints default to `false` and MCP's `destructiveHint`/`openWorldHint` default to `true`, both are set explicitly whenever a tool has annotations (Chrome omits false hints, so the spec defaults are filled in). The original WebMCP hints (including `debugging`) are passed through in `_meta["webmcp/annotations"]`
 - **Tool origin**: the registering document's origin is passed in `_meta["webmcp/origin"]` and in `webmcp_list_tools` output, since the spec expects agents to be shown each tool's origin
 - **Richer `webmcp_list_tools` output**: includes each tool's `title`, `annotations` and (for cross-origin iframe tools) `origin`; the description tells agents to treat `untrustedContentHint` output as untrusted and to confirm `consequentialHint` tools with the user
+- **Output schemas**: a WebMCP tool's `outputSchema` (spec `Tool.outputSchema`, Nov 2026) is exposed as MCP `outputSchema` when it is an object schema, and calls to such tools return the parsed JSON result as `structuredContent` (MCP requires it once a schema is declared). `webmcp_list_tools` also lists `outputSchema`
 - **Launch flags**: `--launch` / `browser_launch` now pass `--enable-features=WebMCPTesting,DevToolsWebMCPSupport` so the CDP `WebMCP` domain is available too
 
 - **Chrome 153 compatibility**: accepts `inputSchema` as an object (spec) or JSON string (current Chrome) and retries `executeTool()` with a JSON string input when Chrome rejects the spec's object form. Verified end to end against Chrome 153.0.8010.12

@@ -4,7 +4,14 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolRegistry } from "./tool-registry.js";
-import { parseInputSchema, toMcpAnnotations, toolAnnotations, type WebMCPTool } from "./webmcp-tool.js";
+import {
+  parseInputSchema,
+  parseOutputSchema,
+  structuredContentOf,
+  toMcpAnnotations,
+  toolAnnotations,
+  type WebMCPTool,
+} from "./webmcp-tool.js";
 
 /**
  * Create an MCP server backed by the ToolRegistry.
@@ -24,11 +31,13 @@ export function createMcpServer(registry: ToolRegistry): Server {
     tools: registry.listTools().map((t: WebMCPTool) => {
       const annotations = toMcpAnnotations(t);
       const webmcpAnnotations = toolAnnotations(t);
+      const outputSchema = parseOutputSchema(t.outputSchema);
       return {
         name: t.name,
         ...(t.title && { title: t.title }),
         description: t.description,
         inputSchema: parseInputSchema(t.inputSchema),
+        ...(outputSchema && { outputSchema }),
         ...(annotations && { annotations }),
         // Preserve the original WebMCP hints (e.g. `debugging`) and the registering
         // document's origin, which the spec expects agents to be shown
@@ -49,7 +58,12 @@ export function createMcpServer(registry: ToolRegistry): Server {
       JSON.stringify(req.params.arguments ?? {}),
     );
 
-    return { content };
+    // MCP: a tool that declares an outputSchema must return structuredContent
+    const tool = registry.getTool(req.params.name) as WebMCPTool | undefined;
+    const structuredContent = parseOutputSchema(tool?.outputSchema)
+      ? structuredContentOf(content)
+      : undefined;
+    return { content, ...(structuredContent && { structuredContent }) };
   });
 
   // Notify connected MCP clients when tool list changes

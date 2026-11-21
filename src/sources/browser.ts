@@ -1339,6 +1339,7 @@ export class PlaywrightBrowserSource implements ToolSource {
             title?: string;
             description: string;
             inputSchema?: unknown;
+            outputSchema?: unknown;
             origin?: string;
             annotations?: Annotations;
           }>>;
@@ -1355,6 +1356,10 @@ export class PlaywrightBrowserSource implements ToolSource {
             inputSchema: typeof t.inputSchema === "string"
               ? JSON.parse(t.inputSchema)
               : t.inputSchema ?? { type: "object", properties: {} },
+            // Spec (Nov 2026): object or null when the tool declares none
+            ...(t.outputSchema != null
+              ? { outputSchema: typeof t.outputSchema === "string" ? JSON.parse(t.outputSchema) : t.outputSchema }
+              : {}),
             ...(t.annotations ? { annotations: t.annotations } : {}),
             ...(t.origin && t.origin !== location.origin ? { origin: t.origin } : {}),
           })),
@@ -1383,7 +1388,7 @@ export class PlaywrightBrowserSource implements ToolSource {
 
   /**
    * Execute a WebMCP tool on the current Playwright page via
-   * `document.modelContext.executeTool(registeredTool, inputObject)`
+   * `document.modelContext.executeTool(tool, inputObject)`
    * (falling back to the legacy `navigator.modelContextTesting.executeTool()`).
    */
   private async handleWebMCPCallTool(
