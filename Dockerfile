@@ -1,5 +1,7 @@
 FROM node:22-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin pnpm (matches CI). pnpm@latest enforces a 1-day minimumReleaseAge,
+# which breaks release builds right after a dependency is published.
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 WORKDIR /app
 
 FROM base AS deps
